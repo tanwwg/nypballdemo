@@ -28,7 +28,7 @@ fun newGameState(): GameState {
         ball = Ball(
             position = Offset(50f, 90f),
             radius = 5f,
-            velocity = Offset.Zero,
+            velocity = Offset(50f, 0f),
             color = Color.Blue
         )
     )
@@ -39,9 +39,14 @@ fun updateGameState(sim: GameState): GameState {
     var newVelocity = sim.ball.velocity + sim.gravity * deltaTime
     var newPos = sim.ball.position + newVelocity * deltaTime
     if (newPos.y - sim.ball.radius < 0) {
-        newPos = sim.ball.position
+        newPos = Offset(newPos.x, sim.ball.position.y)
         newVelocity = Offset(newVelocity.x, -newVelocity.y)
     }
+    if (newPos.x + sim.ball.radius > sim.bounds.width || newPos.x - sim.ball.radius < 0) {
+        newPos = Offset(sim.ball.position.x, newPos.y)
+        newVelocity = Offset(-newVelocity.x, newVelocity.y)
+    }
+
     return sim.copy(frame = sim.frame +1,
         ball = sim.ball.copy(position = newPos, velocity = newVelocity))
 }
