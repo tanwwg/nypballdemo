@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 data class Ball(
@@ -18,7 +19,9 @@ data class GameState(
     val frame: Int = 0,
     val gravity: Offset,
     val bounds: Size,
-    val ball: Ball
+    val ball: Ball,
+    val score: Int = 0,
+    val bullet: Ball? = null
 )
 
 fun newGameState(): GameState {
@@ -34,7 +37,7 @@ fun newGameState(): GameState {
     )
 }
 
-fun updateGameState(sim: GameState): GameState {
+fun updateGameState(sim: GameState, tap: Boolean): GameState {
     val deltaTime = 1.0f / 60.0f
     var newVelocity = sim.ball.velocity + sim.gravity * deltaTime
     var newPos = sim.ball.position + newVelocity * deltaTime
@@ -47,6 +50,34 @@ fun updateGameState(sim: GameState): GameState {
         newVelocity = Offset(-newVelocity.x, newVelocity.y)
     }
 
+    var bullet = sim.bullet
+    if (tap) {
+        bullet = Ball(
+            position = Offset(0f, 0f),
+            radius = 1f,
+            velocity = Offset(100f, 100f),
+            color = Color.Black
+        )
+    }
+
+    var newScore = sim.score
+    if (bullet != null) {
+        bullet = bullet.copy(position = bullet.position + bullet.velocity * deltaTime)
+
+        if (distance(bullet.position, newPos) < sim.ball.radius) {
+            bullet = null
+            newScore += 1
+        }
+    }
+
     return sim.copy(frame = sim.frame +1,
-        ball = sim.ball.copy(position = newPos, velocity = newVelocity))
+        ball = sim.ball.copy(position = newPos, velocity = newVelocity),
+        bullet = bullet,
+        score = newScore)
+}
+
+fun distance(a: Offset, b: Offset): Float {
+    val dx = b.x - a.x
+    val dy = b.y - a.y
+    return sqrt(dx * dx + dy * dy)
 }

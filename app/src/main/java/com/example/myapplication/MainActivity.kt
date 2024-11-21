@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlin.math.min
@@ -51,18 +53,22 @@ fun BouncingBall(modifier: Modifier = Modifier) {
 
     var gameState by remember {
         mutableStateOf(newGameState()) }
+    var onTap by remember { mutableStateOf(false) }
 
     LaunchedEffect("physics") {
         while (true) {
-            gameState = updateGameState(gameState)
+            gameState = updateGameState(gameState, onTap)
+            onTap = false
             delay(1000/60)
         }
     }
 
-    render(gameState, modifier)
+    render(gameState, modifier.clickable { onTap = true })
 }
 
 @Composable fun render(sim: GameState, modifier: Modifier = Modifier) {
+    val tm = rememberTextMeasurer()
+    Text("Score: ${sim.score}", fontSize = 30.sp)
     Canvas(modifier) {
         val scaleFactor = min(
             size.width / sim.bounds.width,
@@ -74,6 +80,9 @@ fun BouncingBall(modifier: Modifier = Modifier) {
         }) {
             drawRect(color = Color.LightGray, size = sim.bounds)
             drawCircle(sim.ball.color, sim.ball.radius, sim.ball.position)
+            if (sim.bullet != null) {
+                drawCircle(sim.bullet.color, sim.bullet.radius, sim.bullet.position)
+            }
         }
 
     }
