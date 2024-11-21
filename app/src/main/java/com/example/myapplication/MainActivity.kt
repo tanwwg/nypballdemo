@@ -63,6 +63,7 @@ fun BouncingBall(modifier: Modifier = Modifier) {
 }
 
 @Composable fun render(sim: GameState, modifier: Modifier = Modifier) {
+
     Canvas(modifier) {
         val scaleFactor = min(
             size.width / sim.bounds.width,
@@ -70,7 +71,10 @@ fun BouncingBall(modifier: Modifier = Modifier) {
         withTransform({
             translate(0f, top = size.height)
             scale(pivot = Offset.Zero, scaleX = 1.0f, scaleY = -1.0f)
+            translate(0f, (size.height - sim.bounds.height * scaleFactor) / 2.0f)
             scale(pivot = Offset.Zero, scale = scaleFactor)
+            rotate(sim.frame.toFloat(), pivot = Offset(50f, 50f))
+            scale(pivot = Offset(50f, 50f), scale = 0.8f)
         }) {
             drawRect(color = Color.LightGray, size = sim.bounds)
             drawCircle(sim.ball.color, sim.ball.radius, sim.ball.position)
